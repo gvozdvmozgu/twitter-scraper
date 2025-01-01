@@ -40,7 +40,7 @@ auth = { type = "user", username = "..", password = "..", email = ".." }
 ## Search tweets
 
 ```powershell
-PS D:\Projects\gvozdvmozgu\twitter-scraper> cargo r -- tweets --help
+PS D:\Projects\gvozdvmozgu\twitter-scraper> cargo r -- tweets --help  
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
      Running `target\debug\twitter-scraper.exe tweets --help`
 Usage: twitter-scraper.exe tweets [OPTIONS] <QUERY>
@@ -49,9 +49,12 @@ Arguments:
   <QUERY>
 
 Options:
+      --from <FROM>
       --search-mode <SEARCH_MODE>  [default: top]
-      --count <COUNT>              [default: 10]
+      --count <COUNT>              [default: 50]
       --cursor <CURSOR>
+      --output <OUTPUT>            [default: pretty_print]
+      --all
   -h, --help                       Print help
 ```
 
@@ -85,8 +88,8 @@ Previous Page: DAACCgACGgKa7QaAJxAKAAMaAprtBn_Y8AgABAAAAAELAAUAAAAoRW1QQzZ3QUFBZ
 ## Search profiles
 
 ```powershell
-PS D:\Projects\gvozdvmozgu\twitter-scraper> cargo r -- profiles --help
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.11s
+PS D:\Projects\gvozdvmozgu\twitter-scraper> cargo r -- profiles --help 
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.10s
      Running `target\debug\twitter-scraper.exe profiles --help`
 Usage: twitter-scraper.exe profiles [OPTIONS] <QUERY>
 
@@ -96,6 +99,8 @@ Arguments:
 Options:
       --count <COUNT>    [default: 10]
       --cursor <CURSOR>
+      --output <OUTPUT>  [default: pretty_print]
+      --all
   -h, --help             Print help
 ```
 
