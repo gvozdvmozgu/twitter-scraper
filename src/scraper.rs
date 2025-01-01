@@ -26,8 +26,12 @@ impl Scraper {
             .build()?;
 
         let Some(csrf) = csrf else {
-            anyhow::bail!("missing csrf token");
+            anyhow::bail!("missing csrf cookie");
         };
+
+        if !cookies.contains("auth_token") {
+            anyhow::bail!("missing auth_token cookie");
+        }
 
         Ok(Self {
             client,
