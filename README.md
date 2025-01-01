@@ -1,5 +1,25 @@
 # twitter-scraper
 
+## Getting Cookies from Firefox
+
+1. Open inspector on page https://x.com/home
+
+![alt text](image.png)
+
+2. Find the address, you can filter it via api.x.com/1.1, or refresh the page and check the first request
+
+![alt text](image-1.png)
+
+3. After selecting the address, filter the headers by the word 'Cookie' and copy the cookies.
+
+![alt text](image-2.png)
+
+## Bearer token
+
+- https://developer.x.com/en/docs/authentication/oauth-2-0/bearer-tokens
+
+To create a bearer token you need to create an application according to the documentation, I used from the GO code `AAAAAAAAAAAAAAAAAAAAAAAFQODgEAAAAAVHTp76lzh3rFzcHbmHVvQxYYpTw%3DckAlMINMjmCwxUcaXbAN4XqJVdgMJaHqNOFgPMK0zN1qLqLQCF`
+
 ## Configuration of `twitter-scraper.toml`
 
 ```toml
