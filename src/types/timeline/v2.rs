@@ -233,12 +233,12 @@ pub(crate) fn parse_legacy_tweet(
         })
         .unwrap_or_default();
 
-    let (photos, videos, _) = if let Some(extended_entities) = &tweet.extended_entities {
-        if let Some(media) = &extended_entities.media {
-            parse_media_groups(media)
-        } else {
-            (Vec::new(), Vec::new(), false)
-        }
+    let (photos, videos, _) = if let Some(media) = tweet
+        .extended_entities
+        .as_ref()
+        .and_then(|extended_entities| extended_entities.media.as_ref())
+    {
+        parse_media_groups(media)
     } else {
         (Vec::new(), Vec::new(), false)
     };

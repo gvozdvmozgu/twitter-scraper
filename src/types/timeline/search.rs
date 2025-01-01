@@ -56,22 +56,21 @@ pub(crate) fn parse_tweets(timeline: &SearchTimeline) -> QueryTweetsResponse {
 
     for instruction in instructions {
         if let Some(instruction_type) = &instruction.instruction_type {
-            if instruction_type == "TimelineAddEntries"
-                || instruction_type == "TimelineReplaceEntry"
-            {
-                if let Some(entry) = &instruction.entry {
-                    if let Some(content) = &entry.content {
-                        match content.cursor_type.as_deref() {
-                            Some("Bottom") => {
-                                bottom_cursor = content.value.clone();
-                                continue;
-                            }
-                            Some("Top") => {
-                                top_cursor = content.value.clone();
-                                continue;
-                            }
-                            _ => {}
+            if matches!(
+                instruction_type.as_str(),
+                "TimelineAddEntries" | "TimelineReplaceEntry"
+            ) {
+                if let Some(content) = instruction.entry.as_ref().and_then(|e| e.content.as_ref()) {
+                    match content.cursor_type.as_deref() {
+                        Some("Bottom") => {
+                            bottom_cursor = content.value.clone();
+                            continue;
                         }
+                        Some("Top") => {
+                            top_cursor = content.value.clone();
+                            continue;
+                        }
+                        _ => {}
                     }
                 }
 
