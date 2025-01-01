@@ -1,8 +1,9 @@
 #![warn(unreachable_pub, unused_qualifications)]
 #![warn(clippy::use_self)]
 
-use anyhow::Context;
+use anyhow::Context as _;
 
+mod auth;
 mod config;
 mod options;
 mod pp;
@@ -12,14 +13,7 @@ mod types;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let config = config::load(concat!(env!("CARGO_PKG_NAME"), ".toml"))?;
-
-    let scraper = match config.auth {
-        config::AuthConfig::UsernamePassword { .. } => todo!(),
-        config::AuthConfig::Cookie { cookie } => {
-            scraper::from_cookies(&config.base, &config.bearer_token, &cookie)
-        }
-        config::AuthConfig::Token { .. } => todo!(),
-    }?;
+    let scraper = scraper::from_config(config).await?;
 
     match options::from_args() {
         options::Options::Tweets {

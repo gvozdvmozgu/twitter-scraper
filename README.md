@@ -1,14 +1,19 @@
 # twitter-scraper
 
-Currently, authentication is implemented only via HTTP cookies.
-
-
 ## Configuration of `twitter-scraper.toml`
 
 ```toml
 base = "https://api.twitter.com"
 bearer_token = "..."
 auth = { type = "cookie", cookie = ''' ... ''' }
+```
+
+OR
+
+```toml
+base = "https://api.twitter.com"
+bearer_token = "AAAAAAAAAAAAAAAAAAAAAFQODgEAAAAAVHTp76lzh3rFzcHbmHVvQxYYpTw%3DckAlMINMjmCwxUcaXbAN4XqJVdgMJaHqNOFgPMK0zN1qLqLQCF"
+auth = { type = "user", username = "..", password = "..", email = ".." }
 ```
 
 

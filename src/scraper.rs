@@ -1,45 +1,14 @@
-use secrecy::ExposeSecret as _;
+use secrecy::{ExposeSecret as _, SecretString};
+
+use crate::{auth, config::Config};
 
 pub(crate) struct Scraper {
     client: reqwest::Client,
-    bearer_token: secrecy::SecretString,
-    csrf: secrecy::SecretString,
+    bearer_token: SecretString,
+    csrf: SecretString,
 }
 
 impl Scraper {
-    fn from_cookies(base: &url::Url, bearer_token: &str, cookies: &str) -> anyhow::Result<Self> {
-        let bearer_token = format!("Bearer {bearer_token}");
-
-        let jar = reqwest::cookie::Jar::default();
-        let mut csrf = None;
-
-        for cookie in cookies.split(';') {
-            if let Some(raw) = cookie.trim().strip_prefix("ct0=") {
-                csrf = Some(raw.into());
-            }
-
-            jar.add_cookie_str(cookie, base);
-        }
-
-        let client = reqwest::ClientBuilder::new()
-            .cookie_provider(jar.into())
-            .build()?;
-
-        let Some(csrf) = csrf else {
-            anyhow::bail!("missing csrf cookie");
-        };
-
-        if !cookies.contains("auth_token") {
-            anyhow::bail!("missing auth_token cookie");
-        }
-
-        Ok(Self {
-            client,
-            bearer_token: bearer_token.into(),
-            csrf,
-        })
-    }
-
     pub(crate) async fn tweets(
         &self,
         search_mode: SearchMode,
@@ -138,7 +107,7 @@ impl Scraper {
             .client
             .get("https://api.twitter.com/graphql/nK1dw4oV3k4w5TdtcAdSww/SearchTimeline")
             .query(params)
-            .header("Authorization", self.bearer_token.expose_secret())
+            .bearer_auth(self.bearer_token.expose_secret())
             .header("x-csrf-token", self.csrf.expose_secret())
             .build()?;
 
@@ -151,12 +120,14 @@ impl Scraper {
     }
 }
 
-pub(crate) fn from_cookies(
-    base: &url::Url,
-    bearer_token: &str,
-    cookies: &str,
-) -> anyhow::Result<Scraper> {
-    Scraper::from_cookies(base, bearer_token, cookies)
+pub(crate) async fn from_config(config: Config) -> anyhow::Result<Scraper> {
+    let (client, csrf) = auth::from_config(&config).await?;
+
+    Ok(Scraper {
+        client,
+        bearer_token: config.bearer_token,
+        csrf,
+    })
 }
 
 #[derive(Debug, Clone, Copy, strum::EnumString, strum::Display)]

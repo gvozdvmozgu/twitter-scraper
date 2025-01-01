@@ -1,18 +1,24 @@
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
+use secrecy::SecretString;
+use serde::Deserialize;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "lowercase")]
 pub(crate) enum AuthConfig {
-    UsernamePassword { username: String, password: String },
-    Cookie { cookie: String },
-    Token { token: String },
+    User {
+        username: String,
+        password: SecretString,
+        email: Option<String>,
+    },
+    Cookie {
+        cookie: SecretString,
+    },
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub(crate) struct Config {
     pub(crate) base: reqwest::Url,
-    pub(crate) bearer_token: String,
+    pub(crate) bearer_token: SecretString,
     pub(crate) auth: AuthConfig,
 }
 
