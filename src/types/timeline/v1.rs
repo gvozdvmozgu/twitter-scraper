@@ -307,18 +307,30 @@ pub(crate) struct TimelineV1 {
     pub(crate) timeline: Option<TimelineDataRaw>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub(crate) struct QueryTweetsResponse {
     pub(crate) tweets: Vec<Tweet>,
     pub(crate) next: Option<String>,
     pub(crate) previous: Option<String>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+impl QueryTweetsResponse {
+    pub(crate) fn merge(&mut self, mut other: Vec<Tweet>) {
+        self.tweets.append(&mut other);
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub(crate) struct QueryProfilesResponse {
     pub(crate) profiles: Vec<Profile>,
     pub(crate) next: Option<String>,
     pub(crate) previous: Option<String>,
+}
+
+impl QueryProfilesResponse {
+    pub(crate) fn merge(&mut self, mut other: Vec<Profile>) {
+        self.profiles.append(&mut other);
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]

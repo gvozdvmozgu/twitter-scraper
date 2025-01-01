@@ -2,6 +2,7 @@
 #![warn(clippy::use_self)]
 
 use anyhow::Context as _;
+use types::timeline::v1::{QueryProfilesResponse, QueryTweetsResponse};
 
 mod auth;
 mod config;
@@ -17,27 +18,88 @@ async fn main() -> anyhow::Result<()> {
 
     match options::from_args() {
         options::Options::Tweets {
-            query,
+            mut query,
+            from,
             search_mode,
             count,
             cursor,
+            output,
+            all,
         } => {
-            let tweets = scraper
-                .tweets(search_mode, &query, count, cursor)
-                .await
-                .context("failed to scrape tweets")?;
-            pp::tweets(&tweets);
+            if let Some(from) = from {
+                query = format!("from:{} {}", from, query);
+            }
+
+            let tweets = if all {
+                let mut cursor = None;
+                let mut tweets = QueryTweetsResponse::default();
+
+                loop {
+                    let new = scraper
+                        .tweets(search_mode, &query, count, cursor)
+                        .await
+                        .context("failed to scrape tweets")?;
+
+                    if new.tweets.is_empty() {
+                        break tweets;
+                    }
+
+                    cursor = new.next;
+                    tweets.merge(new.tweets);
+                }
+            } else {
+                scraper
+                    .tweets(search_mode, &query, count, cursor)
+                    .await
+                    .context("failed to scrape tweets")?
+            };
+
+            match output {
+                options::Output::PrettyPrint => pp::tweets(&tweets),
+                options::Output::Json => {
+                    let json = serde_json::to_string_pretty(&tweets)?;
+                    std::fs::write("tweets.json", json).context("writing `tweets.json`")?;
+                }
+            }
         }
         options::Options::Profiles {
             query,
             count,
             cursor,
+            output,
+            all,
         } => {
-            let profiles = scraper
-                .profiles(&query, count, cursor)
-                .await
-                .context("failed to scrape profiles")?;
-            pp::profiles(&profiles);
+            let profiles = if all {
+                let mut cursor = None;
+                let mut profiles = QueryProfilesResponse::default();
+
+                loop {
+                    let new = scraper
+                        .profiles(&query, count, cursor)
+                        .await
+                        .context("failed to scrape tweets")?;
+
+                    if new.profiles.is_empty() {
+                        break profiles;
+                    }
+
+                    cursor = new.next;
+                    profiles.merge(new.profiles);
+                }
+            } else {
+                scraper
+                    .profiles(&query, count, cursor)
+                    .await
+                    .context("failed to scrape tweets")?
+            };
+
+            match output {
+                options::Output::PrettyPrint => pp::profiles(&profiles),
+                options::Output::Json => {
+                    let json = serde_json::to_string_pretty(&profiles)?;
+                    std::fs::write("profiles.json", json).context("writing `profiles.json`")?;
+                }
+            }
         }
     }
 
