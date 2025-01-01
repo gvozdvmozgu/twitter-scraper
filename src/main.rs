@@ -1,6 +1,8 @@
 #![warn(unreachable_pub, unused_qualifications)]
 #![warn(clippy::use_self)]
 
+use anyhow::Context;
+
 mod config;
 mod options;
 mod pp;
@@ -26,7 +28,10 @@ async fn main() -> anyhow::Result<()> {
             count,
             cursor,
         } => {
-            let tweets = scraper.tweets(search_mode, &query, count, cursor).await?;
+            let tweets = scraper
+                .tweets(search_mode, &query, count, cursor)
+                .await
+                .context("failed to scrape tweets")?;
             pp::tweets(&tweets);
         }
         options::Options::Profiles {
@@ -34,7 +39,10 @@ async fn main() -> anyhow::Result<()> {
             count,
             cursor,
         } => {
-            let profiles = scraper.profiles(&query, count, cursor).await?;
+            let profiles = scraper
+                .profiles(&query, count, cursor)
+                .await
+                .context("failed to scrape profiles")?;
             pp::profiles(&profiles);
         }
     }
